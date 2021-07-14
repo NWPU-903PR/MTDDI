@@ -27,4 +27,4 @@ $ pip install -r requirements.txt
 
 License
 
-Decagon is licensed under the Northwestern polytechnical University License.
+Decagon is licensed under the MIT License.
