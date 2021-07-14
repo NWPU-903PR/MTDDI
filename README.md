@@ -1,6 +1,6 @@
 MTDDI: a graph convolutional network framework for predicting Multi-Type Drug-Drug Interactions
 YueHua Feng; ShaoWu Zhang; Qing-Qing Zhang; Chu-Han Zhang; Jian-Yu Shi
-
+The link to the article is:     https://www.researchsquare.com/article/rs-397281/v1
 This repository contains code and data to run the MTDDI algorithm. MTDDI is a a novel end-to-end deep learning-based predictive method 
 for predict DDIs as well as its types. The encoder derived from deep relational graph convolutional networks to capture the structural
 relationship between multi-type DDI entries, and the the tensor-like decoder to uniformly model both single-fold interactions and multi-fold 
