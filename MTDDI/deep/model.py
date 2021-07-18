@@ -44,7 +44,7 @@ class Model(object):
         pass
 
 
-class DecagonModel(Model):
+class MTModel(Model):
     def __init__(self, placeholders, num_feat, nonzero_feat, edge_types, decoders, **kwargs):
         super(DecagonModel, self).__init__(**kwargs)
         self.edge_types = edge_types
@@ -73,77 +73,52 @@ class DecagonModel(Model):
 
         for i, hid1 in self.hidden1.items():
             self.hidden1[i] = tf.nn.relu(tf.add_n(hid1))
-##===increase the third layer  ==
-        # self.hidden2 = defaultdict(list)
-        # for i, j in self.edge_types:
-        #     self.hidden2[i].append(GraphConvolutionMulti(
-        #         input_dim=FLAGS.hidden1, output_dim=FLAGS.hidden2,
-        #         edge_type=(i, j), num_types=self.edge_types[i, j],
-        #         adj_mats=self.adj_mats,  act=lambda x: x, dropout=self.dropout,
-        #         logging=self.logging)(self.hidden1[j]))
-        #
-        # for i, hid2 in self.hidden2.items():
-        #     self.hidden2[i] = tf.nn.relu(tf.add_n(hid2))
-        #
-        # self.hidden3 = defaultdict(list)
-        # for i, j in self.edge_types:
-        #     self.hidden3[i].append(GraphConvolutionMulti(
-        #         input_dim=FLAGS.hidden2, output_dim=FLAGS.hidden3,
-        #         edge_type=(i, j), num_types=self.edge_types[i, j],
-        #         adj_mats=self.adj_mats,  act=lambda x: x, dropout=self.dropout,
-        #         logging=self.logging)(self.hidden2[j]))
-        #
-        # for i, hid3 in self.hidden3.items():
-        #     self.hidden3[i] = tf.nn.relu(tf.add_n(hid3))
-        #
-        #
-        # self.embeddings_reltyp = defaultdict(list)
-        # for i, j in self.edge_types:
-        #     self.embeddings_reltyp[i].append(GraphConvolutionMulti(
-        #         input_dim=FLAGS.hidden3, output_dim=FLAGS.hidden4,
-        #         edge_type=(i, j), num_types=self.edge_types[i, j],
-        #         adj_mats=self.adj_mats, act=lambda x: x,
-        #         dropout=self.dropout, logging=self.logging)(self.hidden3[j]))
-###===end===========
 
-        self.embeddings_reltyp = defaultdict(list)
+        self.hidden2 = defaultdict(list)
         for i, j in self.edge_types:
-            self.embeddings_reltyp[i].append(GraphConvolutionMulti(
-                input_dim=FLAGS.hidden1, output_dim=FLAGS.hidden2,
-                edge_type=(i,j), num_types=self.edge_types[i,j],
-                adj_mats=self.adj_mats, act=lambda x: x,
-                dropout=self.dropout, logging=self.logging)(self.hidden1[j]))
-        #
+             self.hidden2[i].append(GraphConvolutionMulti(
+                 input_dim=FLAGS.hidden1, output_dim=FLAGS.hidden2,
+                 edge_type=(i, j), num_types=self.edge_types[i, j],
+                 adj_mats=self.adj_mats,  act=lambda x: x, dropout=self.dropout,
+                 logging=self.logging)(self.hidden1[j]))
+        
+         for i, hid2 in self.hidden2.items():
+             self.hidden2[i] = tf.nn.relu(tf.add_n(hid2))
+        
+         self.hidden3 = defaultdict(list)
+         for i, j in self.edge_types:
+             self.hidden3[i].append(GraphConvolutionMulti(
+                 input_dim=FLAGS.hidden2, output_dim=FLAGS.hidden3,
+                 edge_type=(i, j), num_types=self.edge_types[i, j],
+                 adj_mats=self.adj_mats,  act=lambda x: x, dropout=self.dropout,
+                 logging=self.logging)(self.hidden2[j]))
+        
+         for i, hid3 in self.hidden3.items():
+             self.hidden3[i] = tf.nn.relu(tf.add_n(hid3))
+        
+        
+         self.embeddings_reltyp = defaultdict(list)
+         for i, j in self.edge_types:
+             self.embeddings_reltyp[i].append(GraphConvolutionMulti(
+                 input_dim=FLAGS.hidden3, output_dim=FLAGS.hidden4,
+                 edge_type=(i, j), num_types=self.edge_types[i, j],
+                 adj_mats=self.adj_mats, act=lambda x: x,
+                 dropout=self.dropout, logging=self.logging)(self.hidden3[j]))
+
         self.embeddings = [None] * self.num_obj_types
         for i, embeds in self.embeddings_reltyp.items():
-            # self.embeddings[i] = tf.nn.relu(tf.add_n(embeds))
-            self.embeddings[i] = tf.add_n(embeds)    ##+self.hidden2[i] +self.hidden3[i]
+           self.embeddings[i] = tf.add_n(embeds)+self.hidden2[i] +self.hidden3[i]
 
-        # for i, embeds in self.hidden3.items():
-        #     self.embeddings[i] = self.embeddings[i] + self.hidden2[i] +self.hidden3[i]
+         for i, embeds in self.hidden3.items():
+             self.embeddings[i] = self.embeddings[i] + self.hidden2[i] +self.hidden3[i]
 
 
         self.edge_type2decoder = {}
         for i, j in self.edge_types:
             decoder = self.decoders[i, j]
-            if decoder == 'innerproduct':
-                self.edge_type2decoder[i, j] = InnerProductDecoder(
-                    input_dim=FLAGS.hidden2, logging=self.logging,
-                    edge_type=(i, j), num_types=self.edge_types[i, j],
-                    act=lambda x: x, dropout=self.dropout)
-            elif decoder == 'distmult':
-                self.edge_type2decoder[i, j] = DistMultDecoder(
-                    input_dim=FLAGS.hidden2, logging=self.logging,
-                    edge_type=(i, j), num_types=self.edge_types[i, j],
-                    act=lambda x: x, dropout=self.dropout)
-            elif decoder == 'bilinear':
-                self.edge_type2decoder[i, j] = BilinearDecoder(
-                    input_dim=FLAGS.hidden2, logging=self.logging,
-                    edge_type=(i, j), num_types=self.edge_types[i, j],
-                    act=lambda x: x, dropout=self.dropout)
-            elif decoder == 'dedicom':
+            if decoder == 'dedicom':
                 self.edge_type2decoder[i, j] = DEDICOMDecoder(
-                    input_dim=FLAGS.hidden2, logging=self.logging,
+                    input_dim=FLAGS.hidden4, logging=self.logging,
                     edge_type=(i, j), num_types=self.edge_types[i, j],
                     act=lambda x: x, dropout=self.dropout)
             else:
@@ -154,16 +129,7 @@ class DecagonModel(Model):
         for edge_type in self.edge_types:
             decoder = self.decoders[edge_type]
             for k in range(self.edge_types[edge_type]):
-                if decoder == 'innerproduct':
-                    glb = tf.eye(FLAGS.hidden2, FLAGS.hidden2)
-                    loc = tf.eye(FLAGS.hidden2, FLAGS.hidden2)
-                elif decoder == 'distmult':
-                    glb = tf.diag(self.edge_type2decoder[edge_type].vars['relation_%d' % k])
-                    loc = tf.eye(FLAGS.hidden2, FLAGS.hidden2)
-                elif decoder == 'bilinear':
-                    glb = self.edge_type2decoder[edge_type].vars['relation_%d' % k]
-                    loc = tf.eye(FLAGS.hidden2, FLAGS.hidden2)
-                elif decoder == 'dedicom':
+                if decoder == 'dedicom':
                     glb = self.edge_type2decoder[edge_type].vars['global_interaction']
                     loc = tf.diag(self.edge_type2decoder[edge_type].vars['local_variation_%d' % k])
                 else:
