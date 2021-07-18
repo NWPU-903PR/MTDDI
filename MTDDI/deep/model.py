@@ -2,8 +2,7 @@ from collections import defaultdict
 
 import tensorflow as tf
 
-from .layers import GraphConvolutionMulti, GraphConvolutionSparseMulti, \
-    DistMultDecoder, InnerProductDecoder, DEDICOMDecoder, BilinearDecoder
+from .layers import GraphConvolutionMulti, GraphConvolutionSparseMulti,  DEDICOMDecoder
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
