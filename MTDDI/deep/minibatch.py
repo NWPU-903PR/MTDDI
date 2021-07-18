@@ -118,35 +118,7 @@ class EdgeMinibatchIterator(object):
 
         train_no_link_index = non_link_index[(num_test*self.mutiple_neg_sample)+ num_val*self.mutiple_neg_sample:]
         train_edges_neg = non_link_position[train_no_link_index]        #
-        #
-        # test_edges_false = []
-        # while len(test_edges_false) < len(test_edges):
-        #     if len(test_edges_false) % 1000 == 0:
-        #         print("Constructing test edges=", "%04d/%04d" % (len(test_edges_false), len(test_edges)))
-        #     idx_i = np.random.randint(0, self.adj_mats[edge_type][type_idx].shape[0])
-        #     idx_j = np.random.randint(0, self.adj_mats[edge_type][type_idx].shape[1])
-        #     if self._ismember([idx_i, idx_j], edges_all):
-        #         continue
-        #     if test_edges_false:
-        #         if self._ismember([idx_i, idx_j], test_edges_false):
-        #             continue
-        #     test_edges_false.append([idx_i, idx_j])
-        #
-        # val_edges_false = []
-        # while len(val_edges_false) < len(val_edges):
-        #     if len(val_edges_false) % 1000 == 0:
-        #         print("Constructing val edges=", "%04d/%04d" % (len(val_edges_false), len(val_edges)))
-        #     idx_i = np.random.randint(0, self.adj_mats[edge_type][type_idx].shape[0])
-        #     idx_j = np.random.randint(0, self.adj_mats[edge_type][type_idx].shape[1])
-        #     if self._ismember([idx_i, idx_j], edges_all):
-        #         continue
-        #     if val_edges_false:
-        #         if self._ismember([idx_i, idx_j], val_edges_false):
-        #             continue   #'''if self._ismember([idx_i, idx_j], test_edges_false):   ##验证集的负样本和测试集的负样本设为不同
-        #
-        #     val_edges_false.append([idx_i, idx_j])
-                
-            
+                 
         # Re-build adj matrices
         data = np.ones(train_edges.shape[0])
         adj_train = sp.csr_matrix(
@@ -226,8 +198,6 @@ class EdgeMinibatchIterator(object):
         sim_min_batch = self.drug_DBP_similarity[batch_node][:][:,batch_node]
 
         return self.batch_feed_dict(batch_edges, batch_neg_edges,batch_node,adj_min_batch,sim_min_batch,self.current_edge_type_idx, placeholders)
-
-
 
 
     def num_training_batches(self, edge_type, type_idx):
