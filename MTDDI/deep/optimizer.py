@@ -5,7 +5,7 @@ flags = tf.app.flags
 FLAGS = flags.FLAGS
 
 
-class DecagonOptimizer(object):
+class Optimizer(object):
     def __init__(self, embeddings, latent_inters, latent_varies,
                  degrees, edge_types, edge_type2dim, placeholders,
                  margin=0.1, neg_sample_weights=1., batch_size=100):
